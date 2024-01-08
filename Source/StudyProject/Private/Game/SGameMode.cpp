@@ -4,11 +4,12 @@
 #include "Game/SGameMode.h"
 #include "Controllers/SPlayerController.h"
 #include "Characters/SPlayerPawn.h"
+#include "Characters/SRPGCharacter.h"
 
 ASGameMode::ASGameMode()
 {
 	PlayerControllerClass = ASPlayerController::StaticClass();
-	DefaultPawnClass = ASPlayerPawn::StaticClass();
+	DefaultPawnClass = ASRPGCharacter::StaticClass();
 }
 
 
