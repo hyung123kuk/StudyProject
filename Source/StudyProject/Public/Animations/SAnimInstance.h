@@ -53,4 +53,8 @@ protected:
 
     FOnCheckHitDelegate OnCheckHitDelegate;
     FOnCheckCanNextComboDelegate OnCheckCanNextComboDelegate;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "USAnimInstance", Meta = (AllowPrivateAccess))
+    uint8 bIsDead : 1;
+
 };
