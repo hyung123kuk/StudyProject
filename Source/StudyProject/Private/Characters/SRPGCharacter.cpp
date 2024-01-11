@@ -18,6 +18,7 @@
 #include "Engine/EngineTypes.h"
 #include "Engine/DamageEvents.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Game/SPlayerState.h"
 
 ASRPGCharacter::ASRPGCharacter() 
     : bIsAttacking(false)
@@ -69,6 +70,15 @@ void ASRPGCharacter::BeginPlay()
         AnimInstance->OnCheckCanNextComboDelegate.AddDynamic(this, &ThisClass::CheckCanNextCombo);
     }
 
+    ASPlayerState* PS = GetPlayerState<ASPlayerState>();
+    if (true == ::IsValid(PS))
+    {
+        if (false == PS->OnCurrentLevelChangedDelegate.IsAlreadyBound(this, &ThisClass::OnCurrentLevelChanged))
+        {
+            PS->OnCurrentLevelChangedDelegate.AddDynamic(this, &ThisClass::OnCurrentLevelChanged);
+        }
+    }
+
 }
 
 void ASRPGCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -77,16 +87,11 @@ void ASRPGCharacter::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupt
     bIsAttacking = false;
 }
 
-
-void ASRPGCharacter::SetCurrentEXP(float InCurrentEXP)
+void ASRPGCharacter::OnCurrentLevelChanged(int32 InOldCurrentLevel, int32 InNewCurrentLevel)
 {
-    CurrentEXP = FMath::Clamp(CurrentEXP + InCurrentEXP, 0.f, MaxEXP);
-    if (MaxEXP - KINDA_SMALL_NUMBER < CurrentEXP)
-    {
-        CurrentEXP = 0.f;
-        ParticleSystemComponent->Activate(true);
-    }
+    ParticleSystemComponent->Activate(true);
 }
+
 
 void ASRPGCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -235,18 +240,6 @@ void ASRPGCharacter::EndCombo(UAnimMontage* InAnimMontage, bool bInterrupted)
 float ASRPGCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
     float FinalDamageAmount = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-
-    CurrentHP = FMath::Clamp(CurrentHP - FinalDamageAmount, 0.f, MaxHP);
-
-    if (CurrentHP < KINDA_SMALL_NUMBER)
-    {
-        bIsDead = true;
-        CurrentHP = 0.f;
-        GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-        GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);
-    }
-
-    UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("%s [%.1f / %.1f]"), *GetName(), CurrentHP, MaxHP));
 
     return FinalDamageAmount;
 }

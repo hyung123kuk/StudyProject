@@ -1,27 +1,37 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// SGameInstance.cpp
 
 
 #include "Game/SGameInstance.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "SUnrealObjectClass.h"
-#include "Examples/SPigeon.h"
-#include "Examples/SFlyable.h"
-#include "JsonObjectConverter.h"
-#include "UObject/SavePackage.h"
 
-USGameInstance::USGameInstance()
-{
-	Name = TEXT("USGameInstance Class Default Object");
-}
 
 void USGameInstance::Init()
 {
-	Super::Init();
+    Super::Init();
 
+    if (false == ::IsValid(CharacterStatDataTable) || CharacterStatDataTable->GetRowMap().Num() <= 0)
+    {
+        UE_LOG(LogTemp, Error, TEXT("Not enuough data in CharacterStatDataTable."));
+    }
+    else
+    {
+        for (int32 i = 1; i <= CharacterStatDataTable->GetRowMap().Num(); ++i)
+        {
+            check(nullptr != GetCharacterStatDataTableRow(i));
+        }
+    }
 }
 
 void USGameInstance::Shutdown()
 {
-	Super::Shutdown();
+    Super::Shutdown();
+}
 
+FSStatTableRow* USGameInstance::GetCharacterStatDataTableRow(int32 InLevel)
+{
+    if (true == ::IsValid(CharacterStatDataTable))
+    {
+        return CharacterStatDataTable->FindRow<FSStatTableRow>(*FString::FromInt(InLevel), TEXT(""));
+    }
+
+    return nullptr;
 }

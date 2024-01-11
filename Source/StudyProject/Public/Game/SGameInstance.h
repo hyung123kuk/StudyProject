@@ -1,31 +1,72 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// SGameInstance.h
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Engine/DataTable.h"
 #include "SGameInstance.generated.h"
 
+USTRUCT(BlueprintType)
+struct FSStatTableRow : public FTableRowBase
+{
+    GENERATED_BODY()
+
+public:
+    FSStatTableRow()
+    {
+    }
+
+public:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    float MaxHP;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+
+    
+    
+    
+    public:
+    USPlayerStateSave();
+
+    UPROPERTY()
+    FString PlayerCharacterName;
+
+    UPROPERTY()
+    int32 CurrentLevel;
+
+    UPROPERTY()
+    float CurrentEXP;public:
+    USPlayerStateSave();
+
+    UPROPERTY()
+    FString PlayerCharacterName;
+
+    UPROPERTY()
+    int32 CurrentLevel;
+
+    UPROPERTY()
+    float CurrentEXP;
+};
 /**
- * 
+ *
  */
 UCLASS()
 class STUDYPROJECT_API USGameInstance : public UGameInstance
 {
-	GENERATED_BODY()
-	
-public:
+    GENERATED_BODY()
 
-	USGameInstance();
-	
-	virtual void Init() override;
-	virtual void Shutdown() override;
+    public:
+    virtual void Init() override;
+
+    virtual void Shutdown() override;
+
+    const UDataTable* GetCharacterStatDataTable() { return CharacterStatDataTable; }
+
+    FSStatTableRow* USGameInstance::GetCharacterStatDataTableRow(int32 InLevel);
 
 private:
-	UPROPERTY()
-	FString Name;
-
-	UPROPERTY()
-	TObjectPtr<class USPigeon> SerializedPigeon;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "USGameInstance", Meta = (AllowPrivateAccess))
+    class UDataTable* CharacterStatDataTable;
 
 };

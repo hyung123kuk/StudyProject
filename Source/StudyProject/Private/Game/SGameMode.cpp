@@ -5,6 +5,7 @@
 #include "Controllers/SPlayerController.h"
 #include "Characters/SPlayerPawn.h"
 #include "Characters/SRPGCharacter.h"
+#include "Game/SPlayerState.h"
 
 ASGameMode::ASGameMode()
 {
@@ -13,3 +14,13 @@ ASGameMode::ASGameMode()
 }
 
 
+void ASGameMode::PostLogin(APlayerController* NewPlayer)
+{
+    Super::PostLogin(NewPlayer);
+
+    ASPlayerState* PlayerState = NewPlayer->GetPlayerState<ASPlayerState>();
+    if (true == ::IsValid(PlayerState))
+    {
+        PlayerState->InitPlayerState();
+    }
+}
