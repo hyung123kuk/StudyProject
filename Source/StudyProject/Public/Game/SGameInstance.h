@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Engine/DataTable.h"
+#include "Engine/AssetManager.h"
 #include "SGameInstance.generated.h"
 
 USTRUCT(BlueprintType)
@@ -34,7 +35,7 @@ class STUDYPROJECT_API USGameInstance : public UGameInstance
 {
     GENERATED_BODY()
 
-    public:
+public:
     virtual void Init() override;
 
     virtual void Shutdown() override;
@@ -43,6 +44,8 @@ class STUDYPROJECT_API USGameInstance : public UGameInstance
 
     FSStatTableRow* USGameInstance::GetCharacterStatDataTableRow(int32 InLevel);
 
+public:
+    FStreamableManager StreamableManager = FStreamableManager();
 private:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "USGameInstance", Meta = (AllowPrivateAccess))
     class UDataTable* CharacterStatDataTable;

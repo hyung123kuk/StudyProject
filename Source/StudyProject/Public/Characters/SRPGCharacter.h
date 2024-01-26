@@ -51,6 +51,9 @@ private:
     UFUNCTION()
     void OnCurrentLevelChanged(int32 InOldCurrentLevel, int32 InNewCurrentLevel);
 
+    UFUNCTION()
+    void OnAssetLoaded();
+
 private:
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ASRPGCharacter", Meta = (AllowPrivateAccess))
     TObjectPtr<class USInputConfigData> PlayerCharacterInputConfigData;
@@ -81,5 +84,9 @@ private:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ASRPGCharacter", Meta = (AllowPrivateAccess))
     TObjectPtr<class UParticleSystemComponent> ParticleSystemComponent;
+
+    FSoftObjectPath CurrentPlayerCharacterMeshPath = FSoftObjectPath();
+
+    TSharedPtr<struct FStreamableHandle> AssetStreamableHandle = nullptr;
 
 };
