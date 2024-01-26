@@ -22,31 +22,9 @@ public:
     float MaxHP;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-
+    float MaxEXP;
     
-    
-    
-    public:
-    USPlayerStateSave();
 
-    UPROPERTY()
-    FString PlayerCharacterName;
-
-    UPROPERTY()
-    int32 CurrentLevel;
-
-    UPROPERTY()
-    float CurrentEXP;public:
-    USPlayerStateSave();
-
-    UPROPERTY()
-    FString PlayerCharacterName;
-
-    UPROPERTY()
-    int32 CurrentLevel;
-
-    UPROPERTY()
-    float CurrentEXP;
 };
 /**
  *

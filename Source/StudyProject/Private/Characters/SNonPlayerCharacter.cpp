@@ -13,6 +13,8 @@
 #include "UI/StudyUserWidget.h"
 #include "UI/SW_HPBar.h"
 #include "Game/SPlayerState.h"
+#include "Engine/EngineTypes.h"
+#include "Engine/DamageEvents.h"
 
 ASNonPlayerCharacter::ASNonPlayerCharacter()
 {
@@ -123,6 +125,20 @@ void ASNonPlayerCharacter::Attack()
         if (false == AnimInstance->OnMontageEnded.IsAlreadyBound(this, &ThisClass::OnAttackAnimMontageEnded))
         {
             AnimInstance->OnMontageEnded.AddDynamic(this, &ThisClass::OnAttackAnimMontageEnded);
+        }
+    }
+
+    if (true == bResult)
+    {
+        if (true == ::IsValid(HitResult.GetActor()))
+        {
+            //UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("[NPC] Hit Actor Name: %s"), *HitResult.GetActor()->GetName()));
+
+            ASCharacter* PlayerCharacter = Cast<ASCharacter>(HitResult.GetActor());
+            if (true == ::IsValid(PlayerCharacter))
+            {
+                PlayerCharacter->TakeDamage(10.f, FDamageEvent(), GetController(), this);
+            }
         }
     }
 
