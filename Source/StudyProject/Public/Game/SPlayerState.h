@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "Game/SPlayerStateSave.h"
 #include "SPlayerState.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCurrentLevelChangedDelegate, int32, InOldCurrentLevel, int32, InNewCurrentLevel);
@@ -32,6 +33,10 @@ public:
     void SetCurrentEXP(float InCurrentEXP);
 
     void SavePlayerState();
+    
+    ETeamType GetCurrentTeamType() const { return CurrentTeamType; }
+
+    void SetCurrentTeamType(ETeamType InCurrentTeamType) { CurrentTeamType = InCurrentTeamType; }
 
 public:
     FOnCurrentLevelChangedDelegate OnCurrentLevelChangedDelegate;
@@ -56,5 +61,7 @@ private:
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess = true))
     float CurrentEXP = 0;
 
+    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "ASPlayerState", Meta = (AllowPrivateAccess))
+    ETeamType CurrentTeamType = ETeamType::Red;
 
 };
