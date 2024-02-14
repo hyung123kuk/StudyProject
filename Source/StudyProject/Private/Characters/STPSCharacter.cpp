@@ -16,6 +16,7 @@
 #include "Components/SStatComponent.h"
 #include "Engine/EngineTypes.h"
 #include "Engine/DamageEvents.h"
+#include "WorldStatics/SLandMine.h"
 
 ASTPSCharacter::ASTPSCharacter()
     : ASCharacter()
@@ -153,6 +154,7 @@ void ASTPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
         EnhancedInputComponent->BindAction(PlayerCharacterInputConfigData->TriggerAction, ETriggerEvent::Started, this, &ThisClass::ToggleTrigger);
         EnhancedInputComponent->BindAction(PlayerCharacterInputConfigData->AttackAction, ETriggerEvent::Started, this, &ThisClass::StartFire);
         EnhancedInputComponent->BindAction(PlayerCharacterInputConfigData->AttackAction, ETriggerEvent::Completed, this, &ThisClass::StopFire);
+        EnhancedInputComponent->BindAction(PlayerCharacterInputConfigData->LandMineAction, ETriggerEvent::Started, this, &ThisClass::SpawnLandMine);
     }
 }
 
@@ -291,4 +293,24 @@ void ASTPSCharacter::OnHittedRagdollRestoreTimerElapsed()
     TargetRagDollBlendWeight = 0.f;
     CurrentRagDollBlendWeight = 1.f;
     bIsNowRagdollBlending = true;
+}
+
+void ASTPSCharacter::SpawnLandMine(const FInputActionValue& InValue)
+{
+    SpawnLandMine_Server();
+}
+
+bool ASTPSCharacter::SpawnLandMine_Server_Validate()
+{
+    return true;
+}
+
+void ASTPSCharacter::SpawnLandMine_Server_Implementation()
+{
+    if (true == ::IsValid(LandMineClass))
+    {
+        FVector SpawnedLocation = (GetActorLocation() + GetActorForwardVector() * 200.f) - FVector(0.f, 0.f, 90.f);
+        ASLandMine* SpawnedLandMine = GetWorld()->SpawnActor<ASLandMine>(LandMineClass, SpawnedLocation, FRotator::ZeroRotator);
+        SpawnedLandMine->SetOwner(GetController());
+    }
 }

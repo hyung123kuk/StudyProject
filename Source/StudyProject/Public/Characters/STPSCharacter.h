@@ -54,6 +54,11 @@ private:
     UFUNCTION()
     void OnHittedRagdollRestoreTimerElapsed();
 
+    void SpawnLandMine(const FInputActionValue& InValue);
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void SpawnLandMine_Server();
+
 private:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ASTPSCharacter", meta = (AllowPrivateAccess))
     TObjectPtr<USkeletalMeshComponent> WeaponSkeletalMeshComponent;
@@ -102,4 +107,7 @@ private:
     float CurrentRagDollBlendWeight = 0.f;
 
     bool bIsNowRagdollBlending = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = ASPlayerCharacter, Meta = (AllowPrivateAccess = true))
+    TSubclassOf<class AActor> LandMineClass;
 };
