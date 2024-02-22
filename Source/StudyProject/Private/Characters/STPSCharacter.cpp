@@ -137,16 +137,11 @@ float ASTPSCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, 
 {
     float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
+    /*
     if (false == ::IsValid(GetStatComponent()))
     {
         return ActualDamage;
     }
-
-    if (GetStatComponent()->GetCurrentHP() < KINDA_SMALL_NUMBER)
-    {
-        GetMesh()->SetSimulatePhysics(true);
-    }
-
 
     if (GetStatComponent()->GetCurrentHP() < KINDA_SMALL_NUMBER)
     {
@@ -163,6 +158,9 @@ float ASTPSCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, 
         HittedRagdollRestoreTimerDelegate.BindUObject(this, &ThisClass::OnHittedRagdollRestoreTimerElapsed);
         GetWorld()->GetTimerManager().SetTimer(HittedRagdollRestoreTimer, HittedRagdollRestoreTimerDelegate, 1.f, false);
     }
+    */
+
+    PlayRagdoll_NetMulticast();
 
     return ActualDamage;
 }
@@ -232,6 +230,12 @@ void ASTPSCharacter::Attack(const FInputActionValue& InValue)
 
 void ASTPSCharacter::Fire()
 {
+
+    if (true == HasAuthority() || GetOwner() != UGameplayStatics::GetPlayerController(this, 0))
+    {
+        return;
+    }
+
     APlayerController* PlayerController = Cast<APlayerController>(GetController());
     if (false == ::IsValid(PlayerController))
     {
@@ -253,7 +257,7 @@ void ASTPSCharacter::Fire()
 
     if (true == bIsCollide)
     {
-        DrawDebugLine(GetWorld(), MuzzleLocation, HitResult.Location, FColor(255, 255, 255, 64), true, 0.1f, 0U, 0.5f);
+        //DrawDebugLine(GetWorld(), MuzzleLocation, HitResult.Location, FColor(255, 255, 255, 64), true, 0.1f, 0U, 0.5f);
         ASCharacter* HittedCharacter = Cast<ASCharacter>(HitResult.GetActor());
         if (true == ::IsValid(HittedCharacter))
         {
@@ -266,17 +270,21 @@ void ASTPSCharacter::Fire()
 
             if (true == BoneNameString.Equals(FString(TEXT("HEAD")), ESearchCase::IgnoreCase))
             {
-                HittedCharacter->TakeDamage(100.f, DamageEvent, GetController(), this);
+                //HittedCharacter->TakeDamage(100.f, DamageEvent, GetController(), this);
+                ApplyDamageAndDrawLine_Server(MuzzleLocation, HitResult.Location, HittedCharacter, 100.f, DamageEvent, GetController(), this);
             }
             else
             {
-                HittedCharacter->TakeDamage(10.f, DamageEvent, GetController(), this);
+                //HittedCharacter->TakeDamage(10.f, DamageEvent, GetController(), this);
+                ApplyDamageAndDrawLine_Server(MuzzleLocation, HitResult.Location, HittedCharacter, 10.f, DamageEvent, GetController(), this);
             }
         }
     }
     else
     {
-        DrawDebugLine(GetWorld(), MuzzleLocation, CameraEndLocation, FColor(255, 255, 255, 64), false, 0.1f, 0U, 0.5f);
+        //DrawDebugLine(GetWorld(), MuzzleLocation, CameraEndLocation, FColor(255, 255, 255, 64), false, 0.1f, 0U, 0.5f);
+        FDamageEvent DamageEvent;
+        ApplyDamageAndDrawLine_Server(MuzzleLocation, CameraEndLocation, nullptr, 0.f, DamageEvent, GetController(), this);
     }
 
     UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -390,5 +398,46 @@ void ASTPSCharacter::SpawnLandMine_Server_Implementation()
         FVector SpawnedLocation = (GetActorLocation() + GetActorForwardVector() * 200.f) - FVector(0.f, 0.f, 90.f);
         ASLandMine* SpawnedLandMine = GetWorld()->SpawnActor<ASLandMine>(LandMineClass, SpawnedLocation, FRotator::ZeroRotator);
         SpawnedLandMine->SetOwner(GetController());
+    }
+}
+
+void ASTPSCharacter::ApplyDamageAndDrawLine_Server_Implementation(const FVector& InDrawStart, const FVector& InDrawEnd, ACharacter* InHittedCharacter, float InDamage, FDamageEvent const& InDamageEvent, AController* InEventInstigator, AActor* InDamageCauser)
+{
+    if (true == ::IsValid(InHittedCharacter))
+    {
+        InHittedCharacter->TakeDamage(InDamage, InDamageEvent, InEventInstigator, InDamageCauser);
+    }
+
+    DrawLine_NetMulticast(InDrawStart, InDrawEnd);
+}
+
+void ASTPSCharacter::DrawLine_NetMulticast_Implementation(const FVector& InDrawStart, const FVector& InDrawEnd)
+{
+    DrawDebugLine(GetWorld(), InDrawStart, InDrawEnd, FColor(255, 255, 255, 64), false, 0.1f, 0U, 0.5f);
+}
+
+void ASTPSCharacter::PlayRagdoll_NetMulticast_Implementation()
+{
+    if (false == ::IsValid(GetStatComponent()))
+    {
+        return;
+    }
+
+    if (GetOwner() == UGameplayStatics::GetPlayerController(this, 0))
+    {
+        UE_LOG(LogTemp, Log, TEXT("%f"), GetStatComponent()->GetCurrentHP());
+    }
+
+    if (GetStatComponent()->GetCurrentHP() <= KINDA_SMALL_NUMBER)
+    {
+        GetMesh()->SetSimulatePhysics(true);
+    }
+    else
+    {
+        FName PivotBoneName = FName(TEXT("spine_01"));
+        GetMesh()->SetAllBodiesBelowSimulatePhysics(PivotBoneName, true);
+        TargetRagDollBlendWeight = 1.f;
+        HittedRagdollRestoreTimerDelegate.BindUObject(this, &ThisClass::OnHittedRagdollRestoreTimerElapsed);
+        GetWorld()->GetTimerManager().SetTimer(HittedRagdollRestoreTimer, HittedRagdollRestoreTimerDelegate, 1.f, false);
     }
 }

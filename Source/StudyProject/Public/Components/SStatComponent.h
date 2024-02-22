@@ -28,9 +28,14 @@ class STUDYPROJECT_API USStatComponent : public UActorComponent
 
     void SetCurrentHP(float InCurrentHP);
 
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
 private:
     UFUNCTION()
     void OnCurrentLevelChanged(int32 InOldCurrentLevel, int32 InNewCurrentLevel);
+
+    UFUNCTION(NetMulticast, Reliable)
+    void OnCurrentHPChanged_NetMulticast(float InOldCurrentHP, float InNewCurrentHP);
 
 public:
     FOnOutOfCurrentHPDelegate OnOutOfCurrentHPDelegate;
@@ -43,10 +48,9 @@ private:
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess))
     TObjectPtr<class USGameInstance> GameInstance;
 
-    UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess))
+    UPROPERTY(Replicated, VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", meta = (AllowPrivateAccess))
     float MaxHP;
 
-    UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", Meta = (AllowPrivateAccess))
+    UPROPERTY(Replicated, VisibleInstanceOnly, BlueprintReadOnly, Category = "USStatComponent", meta = (AllowPrivateAccess))
     float CurrentHP;
-
 };
